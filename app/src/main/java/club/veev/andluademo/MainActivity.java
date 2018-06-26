@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import club.veev.andlua.AndLua;
+import club.veev.andlua.script.LuaScriptFactory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -13,6 +14,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AndLua.runner().runScript("");
+        AndLua.runner().runScript(LuaScriptFactory.stringLuaScript(""));
     }
 }

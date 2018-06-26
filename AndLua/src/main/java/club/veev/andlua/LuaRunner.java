@@ -3,6 +3,8 @@ package club.veev.andlua;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
 
+import club.veev.andlua.script.ILuaScript;
+
 /**
  * Created by Veev on 2018/6/26
  * Email: wangwei07@skyworth.com
@@ -10,22 +12,12 @@ import org.luaj.vm2.LuaValue;
  */
 public class LuaRunner {
 
-    public LuaValue runScript(String script) {
+    public LuaValue runScript(ILuaScript script) {
         return runScript(script, false);
     }
 
-    private LuaValue runScript(String script, boolean isSync) {
-        Globals globals = AndLuaPlatform.customGlobals();
-
-        globals.load(
-                AndLua.getContext().getResources().openRawResource(R.raw.andlua),
-                "AndLua",
-                "t",
-                globals).call();
-
-        globals.load(";DBG=" + AndLua.isDebug() + ";TAG='" + AndLua.getTAG()  + "';").call();
-
-        globals.load(script).call();
+    private LuaValue runScript(ILuaScript script, boolean isSync) {
+        Globals globals = script.getScript();
 
         return globals;
     }

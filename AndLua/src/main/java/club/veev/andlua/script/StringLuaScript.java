@@ -3,7 +3,9 @@ package club.veev.andlua.script;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
 
+import club.veev.andlua.AndLua;
 import club.veev.andlua.AndLuaPlatform;
+import club.veev.andlua.R;
 
 /**
  * Created by Veev on 2018/6/26
@@ -21,7 +23,16 @@ public class StringLuaScript implements ILuaScript {
             mScript = args[0].toString();
 
             mGlobals = AndLuaPlatform.customGlobals();
-            mGlobals.load(mScript);
+
+            mGlobals.load(
+                    AndLua.getContext().getResources().openRawResource(R.raw.andlua),
+                    "AndLua",
+                    "t",
+                    mGlobals).call();
+
+            mGlobals.load(";DBG=" + AndLua.isDebug() + ";TAG='" + AndLua.getTAG()  + "';").call();
+
+            mGlobals.load(mScript).call();
         }
     }
 
