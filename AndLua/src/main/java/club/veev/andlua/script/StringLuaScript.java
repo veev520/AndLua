@@ -1,7 +1,10 @@
 package club.veev.andlua.script;
 
+import android.app.Application;
+
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 
 import club.veev.andlua.AndLua;
 import club.veev.andlua.AndLuaPlatform;
@@ -32,7 +35,7 @@ public class StringLuaScript implements ILuaScript {
 
             mGlobals.load(";DBG=" + AndLua.isDebug() + ";TAG='" + AndLua.getTAG()  + "';").call();
 
-            mGlobals.load(mScript).call();
+            mGlobals.load(mScript).call(CoerceJavaToLua.coerce(AndLua.getContext()));
         }
     }
 

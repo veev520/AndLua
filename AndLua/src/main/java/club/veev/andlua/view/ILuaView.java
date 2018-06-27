@@ -1,5 +1,6 @@
-package club.veev.andlua;
+package club.veev.andlua.view;
 
+import android.content.Context;
 import android.view.View;
 
 import club.veev.andlua.script.ILuaScript;
@@ -19,5 +20,5 @@ public interface ILuaView {
     /**
      * 装载脚本
      */
-    void load(ILuaScript script);
+    void load(Context context, ILuaScript script);
 }
