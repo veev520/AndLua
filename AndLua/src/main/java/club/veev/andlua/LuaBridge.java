@@ -1,13 +1,18 @@
 package club.veev.andlua;
 
+import android.util.Log;
+
 import org.luaj.vm2.*;
+import org.luaj.vm2.ast.Str;
 import org.luaj.vm2.lib.VarArgFunction;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
+import org.luaj.vm2.lib.jse.CoerceLuaToJava;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Handler;
 
 /**
  * Created by Veev on 2018/6/26
@@ -15,19 +20,38 @@ import java.util.Set;
  * Fun: LuaBridge 桥
  */
 public class LuaBridge extends VarArgFunction {
+    private static final String TAG = "LuaBridge";
+
     static final int INIT           = 0;
     static final int REGISTER       = 1;
     static final int CALL           = 2;
     static final int REMOVE         = 3;
+    static final int BRIDGE         = 4;
 
     static final String[] NAMES = {
             "register",
             "call",
-            "remove"
+            "remove",
+            "bridge"
     };
 
     public LuaBridge() {
 
+    }
+
+    /**
+     * 获取 Globals 中的桥实例
+     * @param globals
+     * @return
+     */
+    public static LuaBridge get(Globals globals) {
+        try {
+            return (LuaBridge) CoerceLuaToJava.coerce(
+                    globals.get("getBridge").invoke().arg1(), LuaBridge.class);
+        } catch (Exception e) {
+            Log.e(TAG, "get: 获取 LuaBridge 实例异常", e);
+        }
+        return  null;
     }
 
     @Override
@@ -50,6 +74,8 @@ public class LuaBridge extends VarArgFunction {
                     break;
                 case REMOVE:
                     break;
+                case BRIDGE:
+                    return CoerceJavaToLua.coerce(this);
                 default:
                     System.out.println();
                     System.out.println("====== Start ======");
@@ -163,6 +189,39 @@ public class LuaBridge extends VarArgFunction {
             for (LuaFunction f : set) {
                 f.invoke(CoerceJavaToLua.coerce(data), CoerceJavaToLua.coerce(callback));
             }
+        }
+    }
+
+    /**
+     * 移除 名称为name的所有 handler
+     */
+    public static void removeHandler(String name) {
+        mJavaHandler.remove(name);
+    }
+
+    /**
+     * 移除 handler
+     */
+    public static void removeHandle(String name, LuaHandler handler) {
+        if (handler == null) {
+            return;
+        }
+
+        Set<LuaHandler> set = mJavaHandler.get(name);
+        if (set == null) {
+            return;
+        }
+
+        set.remove(handler);
+    }
+
+    /**
+     * 移除handler
+     * 不建议使用
+     */
+    public static void removeHandler(LuaHandler handler) {
+        for (Set<LuaHandler> h : mJavaHandler.values()) {
+            h.remove(handler);
         }
     }
 

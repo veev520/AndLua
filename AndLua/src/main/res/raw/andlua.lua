@@ -7,10 +7,16 @@ DBG = true
 TAG = 'AndLua'
 local Log = luajava.bindClass('android.util.Log')
 
+---
+--- 日志
 function log(msg)
     if DBG then
         Log:i(TAG, tostring(msg))
     end
 end
 
-log('Hello AndLua.')
+---
+--- 获取桥实例
+function getBridge()
+    return luabridge.bridge()
+end
