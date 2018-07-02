@@ -50,7 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
         ILuaView luaView = new TestView();
         luaView.load(this, LuaScriptFactory.stringLuaScript(FileUtil.readFileToString(f)));
-        mLinearLayout.addView(luaView.getView());
+        if (luaView.getView() != null) {
+            mLinearLayout.addView(luaView.getView());
+        }
 
 //        AndLua.runner().runScript(LuaScriptFactory.stringLuaScript(FileUtil.readFileToString(f)));
     }

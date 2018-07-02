@@ -1,6 +1,7 @@
 package club.veev.andlua.script;
 
 import android.app.Application;
+import android.text.TextUtils;
 
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
@@ -23,7 +24,11 @@ public class StringLuaScript implements ILuaScript {
     @Override
     public void load(Object... args) {
         if (args.length > 0) {
-            mScript = args[0].toString();
+            if (args[0] == null) {
+                mScript = "";
+            } else {
+                mScript = args[0].toString();
+            }
 
             mGlobals = AndLuaPlatform.customGlobals();
 

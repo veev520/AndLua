@@ -25,7 +25,9 @@ public class TestView implements ILuaView {
 
     @Override
     public void load(Context context, ILuaScript script) {
-        LuaValue v = script.getScript().get("getView").call();
-        mView = (View) CoerceLuaToJava.coerce(v, View.class);
+        LuaValue v = script.getScript().get("getView");
+        if (v != LuaValue.NIL) {
+            mView = (View) CoerceLuaToJava.coerce(v.call(), View.class);
+        }
     }
 }
