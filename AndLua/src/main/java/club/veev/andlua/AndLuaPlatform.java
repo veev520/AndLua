@@ -37,6 +37,7 @@ public class AndLuaPlatform {
 
         // AndLua
         globals.load(new LuaBridge());
+        globals.load(new LuaAndroidLib());
 
         // Custom
         if (libs != null) {
