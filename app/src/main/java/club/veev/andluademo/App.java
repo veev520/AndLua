@@ -11,9 +11,15 @@ import club.veev.andlua.AndLua;
  */
 public class App extends Application {
 
+    private static App sApp = null;
+    public static App get() {
+        return sApp;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
+        sApp = this;
 
         AndLua.init(this);
     }

@@ -12,11 +12,19 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.io.IOException;
+
 import club.veev.andlua.AndLua;
 import club.veev.andlua.script.LuaScriptFactory;
 import club.veev.andlua.utils.FileUtil;
 import club.veev.andlua.view.ILuaView;
+import club.veev.andlua.view.LuaView;
 import club.veev.andlua.view.TestView;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -48,13 +56,43 @@ public class MainActivity extends AppCompatActivity {
 //                "    return textView\n" +
 //                "end");
 
-        ILuaView luaView = new TestView();
-        luaView.load(this, LuaScriptFactory.stringLuaScript(FileUtil.readFileToString(f)));
+
+        ILuaView luaView = LuaView.load(this, FileUtil.readFileToString(f));
         if (luaView.getView() != null) {
             mLinearLayout.addView(luaView.getView());
         }
 
+        getLua();
+
 //        AndLua.runner().runScript(LuaScriptFactory.stringLuaScript(FileUtil.readFileToString(f)));
+    }
+
+    private void getLua() {
+        OkHttpClient client = new OkHttpClient();
+        String url = "http://192.168.137.1:8000/";
+        Request request = new Request.Builder().url(url).build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i(TAG, "onFailure: " + e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String content = response.body().string();
+                Log.i(TAG, "onResponse: " + content);
+
+                final ILuaView luaView = LuaView.load(MainActivity.this, content);
+                if (luaView.getView() != null) {
+                    mLinearLayout.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mLinearLayout.addView(luaView.getView());
+                        }
+                    });
+                }
+            }
+        });
     }
 
     private void requestPermission() {

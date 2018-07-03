@@ -1,9 +1,11 @@
 package club.veev.andlua.view;
 
-import android.content.Context;
 import android.view.View;
 
-import club.veev.andlua.script.ILuaScript;
+import org.luaj.vm2.Globals;
+import org.luaj.vm2.LuaValue;
+
+import club.veev.andlua.script.IScript;
 
 /**
  * Created by Veev on 2018/6/26
@@ -20,5 +22,7 @@ public interface ILuaView {
     /**
      * 装载脚本
      */
-    void load(Context context, ILuaScript script);
+    LuaValue load(IScript script);
+
+    Globals getGlobals();
 }

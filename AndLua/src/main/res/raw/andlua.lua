@@ -20,3 +20,10 @@ end
 function getBridge()
     return luabridge.bridge()
 end
+
+function dp(dp)
+    local display = luajava.bindClass('club.veev.andlua.utils.DisplayUtil')
+    return display:dp2px(dp)
+end
+
+print("dp: ", dp(16))
