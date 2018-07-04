@@ -8,6 +8,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         mLinearLayout = findViewById(R.id.content);
 
-        String f = FileUtil.getTestFolder() + "/lua.lua";
+//        String f = FileUtil.getTestFolder() + "/lua.lua";
 //        FileUtil.createNewFile(f, "context = ...\n" +
 //                "\n" +
 //                "local TextView = luajava.bindClass('android.widget.TextView')\n" +
@@ -57,10 +59,10 @@ public class MainActivity extends AppCompatActivity {
 //                "end");
 
 
-        ILuaView luaView = LuaView.load(this, FileUtil.readFileToString(f));
-        if (luaView.getView() != null) {
-            mLinearLayout.addView(luaView.getView());
-        }
+//        ILuaView luaView = LuaView.load(this, FileUtil.readFileToString(f));
+//        if (luaView.getView() != null) {
+//            mLinearLayout.addView(luaView.getView());
+//        }
 
         getLua();
 
@@ -88,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             mLinearLayout.addView(luaView.getView());
+
                         }
                     });
                 }

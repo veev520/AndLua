@@ -6,6 +6,8 @@
 DBG = true
 TAG = 'AndLua'
 local Log = luajava.bindClass('android.util.Log')
+local Toastor = luaandroid.bindClass('club.veev.andlua.utils.Toastor')
+local DisplayUtil = luaandroid.bindClass('club.veev.andlua.utils.DisplayUtil')
 
 ---
 --- 日志
@@ -23,6 +25,12 @@ function log(tag, msg)
 end
 
 ---
+--- toast
+function toast(msg)
+    Toastor:show(msg)
+end
+
+---
 --- 获取桥实例
 function getBridge()
     return luabridge.bridge()
@@ -31,29 +39,25 @@ end
 ---
 --- dp 转 px
 function dp2px(dp)
-    local display = luaandroid.bindClass('club.veev.andlua.utils.DisplayUtil')
-    return display:dp2px(dp)
+    return DisplayUtil:dp2px(dp)
 end
 
 ---
 --- px 转 dp
 function px2dp(dp)
-    local display = luaandroid.bindClass('club.veev.andlua.utils.DisplayUtil')
-    return display:px2dp(dp)
+    return DisplayUtil:px2dp(dp)
 end
 
 ---
 --- sp 转 px
 function sp2px(dp)
-    local display = luaandroid.bindClass('club.veev.andlua.utils.DisplayUtil')
-    return display:sp2px(dp)
+    return DisplayUtil:sp2px(dp)
 end
 
 ---
 --- px 转 sp
 function px2sp(dp)
-    local display = luaandroid.bindClass('club.veev.andlua.utils.DisplayUtil')
-    return display:px2sp(dp)
+    return DisplayUtil:px2sp(dp)
 end
 
 
