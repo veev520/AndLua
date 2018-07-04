@@ -7,21 +7,15 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import java.io.IOException;
 
-import club.veev.andlua.AndLua;
-import club.veev.andlua.script.LuaScriptFactory;
-import club.veev.andlua.utils.FileUtil;
 import club.veev.andlua.view.ILuaView;
 import club.veev.andlua.view.LuaView;
-import club.veev.andlua.view.TestView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -33,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private LinearLayout mLinearLayout;
+    private RecyclerView mRecyclerView;
+    private TestAdapter mLuaAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +40,12 @@ public class MainActivity extends AppCompatActivity {
 //        AndLua.runner().runScript(LuaScriptFactory.stringLuaScript("print(TAG, DBG)"));
 
         mLinearLayout = findViewById(R.id.content);
+        mRecyclerView = findViewById(R.id.recycler);
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        mLuaAdapter = new TestAdapter();
+        mRecyclerView.setAdapter(mLuaAdapter);
 
 //        String f = FileUtil.getTestFolder() + "/lua.lua";
 //        FileUtil.createNewFile(f, "context = ...\n" +
