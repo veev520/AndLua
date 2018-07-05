@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         getLua("http://192.168.137.1:5000/2");
     }
 
-    private void getLua(String url) {
+    private void getLua(final String url) {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(url).build();
         client.newCall(request).enqueue(new Callback() {
@@ -113,22 +113,15 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         LuaBean luaBean = new LuaBean();
                         luaBean.setScript(content);
+                        if (url.endsWith("2")) {
+                            luaBean.setType(LuaBean.TYPE_CUSTOM);
+                        }
 
                         mLuaAdapter.add(new TestBean(TestBean.TYPE_LUA, luaBean));
                     }
                 });
 
                 Log.i(TAG, "onResponse: " + content);
-
-//                final ILuaView luaView = LuaView.load(MainActivity.this, content);
-//                if (luaView.getView() != null) {
-//                    mLinearLayout.post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            mLinearLayout.addView(luaView.getView());
-//                        }
-//                    });
-//                }
             }
         });
     }

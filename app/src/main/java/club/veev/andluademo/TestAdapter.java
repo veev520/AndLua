@@ -129,7 +129,12 @@ public class TestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             try {
                 LuaBean luaBean = (LuaBean) bean.getData();
 
-                ILuaView luaView = LuaView.load(itemView.getContext(), luaBean.getScript());
+                ILuaView luaView;
+                if (TextUtils.equals(LuaBean.TYPE_CUSTOM, luaBean.getType())) {
+                    luaView = LuaView.loadCustom(itemView.getContext(), luaBean.getScript());
+                } else {
+                    luaView = LuaView.load(itemView.getContext(), luaBean.getScript());
+                }
 
                 ((FrameLayout) itemView).removeAllViews();
                 ((FrameLayout) itemView).addView(luaView.getView());

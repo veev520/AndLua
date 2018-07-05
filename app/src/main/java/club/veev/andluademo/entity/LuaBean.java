@@ -8,6 +8,8 @@ package club.veev.andluademo.entity;
  */
 public class LuaBean {
 
+    public static final String TYPE_CUSTOM = "custom";
+
     private int version;
     private String url;
     private String script;
@@ -19,5 +21,13 @@ public class LuaBean {
 
     public void setScript(String script) {
         this.script = script;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
