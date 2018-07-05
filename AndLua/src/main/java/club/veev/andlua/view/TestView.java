@@ -2,6 +2,7 @@ package club.veev.andlua.view;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.Space;
 
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
@@ -33,6 +34,10 @@ public class TestView implements ILuaView {
         LuaValue v = mGlobals.get("getView");
         if (v != LuaValue.NIL) {
             mView = (View) CoerceLuaToJava.coerce(v.call(), View.class);
+        }
+
+        if (mView == null) {
+            mView = new Space(context);
         }
     }
 

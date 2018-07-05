@@ -13,9 +13,14 @@ import android.util.Log;
 import android.widget.LinearLayout;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import club.veev.andlua.view.ILuaView;
 import club.veev.andlua.view.LuaView;
+import club.veev.andluademo.entity.LuaBean;
+import club.veev.andluademo.entity.Test1;
+import club.veev.andluademo.entity.TestBean;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -43,9 +48,11 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.recycler);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.addItemDecoration(new TestItemDecoration());
 
         mLuaAdapter = new TestAdapter();
         mRecyclerView.setAdapter(mLuaAdapter);
+        mLuaAdapter.setData(initData());
 
 //        String f = FileUtil.getTestFolder() + "/lua.lua";
 //        FileUtil.createNewFile(f, "context = ...\n" +
@@ -71,9 +78,25 @@ public class MainActivity extends AppCompatActivity {
 //        AndLua.runner().runScript(LuaScriptFactory.stringLuaScript(FileUtil.readFileToString(f)));
     }
 
+    private List<TestBean> initData() {
+        List<TestBean> list = new ArrayList<>();
+
+        Test1 test1 = new Test1("Lua 特性", "轻量级", "它用标准C语言编写并以源代码形式开放，编译后仅仅一百余K，可以很方便的嵌入别的程序里。");
+        list.add(new TestBean(TestBean.TYPE_TEST_1, test1));
+
+        Test1 test2 = new Test1("Lua 特性", "可扩展", "Lua提供了非常易于使用的扩展接口和机制：由宿主语言(通常是C或C++)提供这些功能，Lua可以使用它们，就像是本来就内置的功能一样。");
+        list.add(new TestBean(TestBean.TYPE_TEST_1, test2));
+
+        return list;
+    }
+
     private void getLua() {
+        getLua("http://192.168.137.1:5000/1");
+        getLua("http://192.168.137.1:5000/2");
+    }
+
+    private void getLua(String url) {
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.137.1:8000/";
         Request request = new Request.Builder().url(url).build();
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -83,19 +106,29 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String content = response.body().string();
+                final String content = response.body().string();
+
+                mRecyclerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        LuaBean luaBean = new LuaBean();
+                        luaBean.setScript(content);
+
+                        mLuaAdapter.add(new TestBean(TestBean.TYPE_LUA, luaBean));
+                    }
+                });
+
                 Log.i(TAG, "onResponse: " + content);
 
-                final ILuaView luaView = LuaView.load(MainActivity.this, content);
-                if (luaView.getView() != null) {
-                    mLinearLayout.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mLinearLayout.addView(luaView.getView());
-
-                        }
-                    });
-                }
+//                final ILuaView luaView = LuaView.load(MainActivity.this, content);
+//                if (luaView.getView() != null) {
+//                    mLinearLayout.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            mLinearLayout.addView(luaView.getView());
+//                        }
+//                    });
+//                }
             }
         });
     }
