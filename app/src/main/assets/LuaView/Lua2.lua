@@ -4,6 +4,10 @@
 local activity, view = ...
 print('activity', activity, 'view', view)
 
+function init()
+	view:setMinimumHeight(dp2px(320))
+end
+
 -- forward declarations of local functions and variables
 local animate,render
 local chars = {}
@@ -112,6 +116,7 @@ text_color:setTextSize(8.0)
 line_color:setColor(0xffffaa33)
 line_color:setStrokeWidth(1.5)
 line_color:setStyle(Style.STROKE)
+line_color:setAntiAlias(true)
 print('text_color, line_color', text_color, line_color)
 
 -- load the logo image

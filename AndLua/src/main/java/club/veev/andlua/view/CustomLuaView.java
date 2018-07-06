@@ -4,11 +4,13 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
 import org.luaj.vm2.Globals;
+import org.luaj.vm2.Lua;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 
@@ -22,15 +24,46 @@ import club.veev.andlua.utils.DisplayUtil;
  * 自定义View
  */
 public class CustomLuaView extends View implements ILuaView {
+    private static final String TAG = "CustomLuaView";
 
     private Globals mGlobals;
     private Context mContext;
+
+    private LuaValue mLuaOnDraw, mLuaOnMeasure, mLuaOnSizeChanged,
+            mLuaOnLayout, mLuaOnTouchEvent;
 
     public CustomLuaView(Context context, IScript script) {
         super(context);
 
         mContext = context;
         init(script);
+    }
+
+    public CustomLuaView(Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public CustomLuaView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public CustomLuaView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    @Override
+    public View getView() {
+        return this;
+    }
+
+    @Override
+    public LuaValue load(IScript script) {
+        return mGlobals.load(script.getInputStream(), script.getName(), script.getMode(), mGlobals);
+    }
+
+    @Override
+    public Globals getGlobals() {
+        return mGlobals;
     }
 
     private void init(IScript script) {
@@ -44,15 +77,27 @@ public class CustomLuaView extends View implements ILuaView {
         // 需要自己处理高度
         setMinimumHeight(DisplayUtil.dp2px(100));
 
-        invalidate();
+        mLuaOnDraw = mGlobals.get("onDraw");
+        mLuaOnLayout = mGlobals.get("onLayout");
+        mLuaOnMeasure = mGlobals.get("onMeasure");
+        mLuaOnTouchEvent = mGlobals.get("onTouchEvent");
+        mLuaOnSizeChanged = mGlobals.get("onSizeChanged");
+
+        LuaValue f = mGlobals.get("init");
+        if (!f.isnil()) {
+            try {
+                f.call();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        LuaValue f = mGlobals.get("onMeasure");
-        if (!f.isnil()) {
+        if (!mLuaOnMeasure.isnil()) {
             try {
-                f.call(CoerceJavaToLua.coerce(widthMeasureSpec),
+                mLuaOnMeasure.call(CoerceJavaToLua.coerce(widthMeasureSpec),
                         CoerceJavaToLua.coerce(heightMeasureSpec));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -63,11 +108,31 @@ public class CustomLuaView extends View implements ILuaView {
     }
 
     @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+
+        if (!mLuaOnSizeChanged.isnil()) {
+            AndLuaPlatform.call(mLuaOnSizeChanged, w, h, oldw, oldh);
+        } else {
+            super.onSizeChanged(w, h, oldw, oldh);
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+
+        if (!mLuaOnLayout.isnil()) {
+            AndLuaPlatform.call(mLuaOnLayout, changed, left, top, right, bottom);
+        } else {
+            super.onLayout(changed, left, top, right, bottom);
+        }
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
-        LuaValue f = mGlobals.get("onDraw");
-        if (!f.isnil()) {
+
+        if (!mLuaOnDraw.isnil()) {
             try {
-                f.call(CoerceJavaToLua.coerce(canvas));
+                mLuaOnDraw.call(CoerceJavaToLua.coerce(canvas));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -108,10 +173,9 @@ public class CustomLuaView extends View implements ILuaView {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        LuaValue f = mGlobals.get("onTouchEvent");
-        if (!f.isnil()) {
+        if (!mLuaOnTouchEvent.isnil()) {
             try {
-                return f.call(CoerceJavaToLua.coerce(event)).toboolean();
+                return mLuaOnTouchEvent.call(CoerceJavaToLua.coerce(event)).toboolean();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -161,20 +225,5 @@ public class CustomLuaView extends View implements ILuaView {
         } else {
             super.onWindowSystemUiVisibilityChanged(visible);
         }
-    }
-
-    @Override
-    public View getView() {
-        return this;
-    }
-
-    @Override
-    public LuaValue load(IScript script) {
-        return mGlobals.load(script.getInputStream(), script.getName(), script.getMode(), mGlobals);
-    }
-
-    @Override
-    public Globals getGlobals() {
-        return mGlobals;
     }
 }

@@ -9,6 +9,7 @@ import org.luaj.vm2.lib.CoroutineLib;
 import org.luaj.vm2.lib.PackageLib;
 import org.luaj.vm2.lib.StringLib;
 import org.luaj.vm2.lib.TableLib;
+import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 import org.luaj.vm2.lib.jse.JseBaseLib;
 import org.luaj.vm2.lib.jse.JseIoLib;
 import org.luaj.vm2.lib.jse.JseMathLib;
@@ -48,5 +49,26 @@ public class AndLuaPlatform {
         LoadState.install(globals);
         LuaC.install(globals);
         return globals;
+    }
+
+    /**
+     * 扩展 call方法
+     * 使其可以传多个参数
+     * @param fun       需要执行的方法
+     * @param values    参数
+     */
+    public static LuaValue call(LuaValue fun, Object ... values) {
+        try {
+            // 参考 LuaValue的call方法
+            LuaValue[] args = new LuaValue[values.length];
+            int i = 0;
+            for (Object obj : values) {
+                args[i++] = CoerceJavaToLua.coerce(obj);
+            }
+            return fun.invoke(args).arg1();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return LuaValue.NIL;
     }
 }
