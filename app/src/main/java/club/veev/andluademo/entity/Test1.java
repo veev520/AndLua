@@ -11,6 +11,15 @@ public class Test1 {
         this.content = content;
     }
 
+    @Override
+    public String toString() {
+        return "Test1{" +
+                "title='" + title + '\'' +
+                ", subTitle='" + subTitle + '\'' +
+                ", content='" + content + '\'' +
+                '}';
+    }
+
     public String getTitle() {
         return title;
     }

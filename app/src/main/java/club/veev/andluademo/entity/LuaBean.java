@@ -11,9 +11,21 @@ public class LuaBean {
     public static final String TYPE_CUSTOM = "custom";
 
     private int version;
+    private int id;
     private String url;
     private String script;
     private String type;
+
+    @Override
+    public String toString() {
+        return "LuaBean{" +
+                "version=" + version +
+                ", id=" + id +
+                ", url='" + url + '\'' +
+                ", script='" + script + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
 
     public String getScript() {
         return script;
@@ -29,5 +41,9 @@ public class LuaBean {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public int getId() {
+        return id;
     }
 }

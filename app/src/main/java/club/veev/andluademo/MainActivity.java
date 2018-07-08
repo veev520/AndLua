@@ -5,19 +5,23 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.LinearLayout;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import club.veev.andlua.view.ILuaView;
-import club.veev.andlua.view.LuaView;
 import club.veev.andluademo.entity.LuaBean;
 import club.veev.andluademo.entity.Test1;
 import club.veev.andluademo.entity.TestBean;
@@ -33,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
     private LinearLayout mLinearLayout;
     private RecyclerView mRecyclerView;
+    private SwipeRefreshLayout mRefreshLayout;
+
     private TestAdapter mLuaAdapter;
 
     @Override
@@ -46,13 +52,21 @@ public class MainActivity extends AppCompatActivity {
 
         mLinearLayout = findViewById(R.id.content);
         mRecyclerView = findViewById(R.id.recycler);
+        mRefreshLayout = findViewById(R.id.swipe);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.addItemDecoration(new TestItemDecoration());
 
         mLuaAdapter = new TestAdapter();
         mRecyclerView.setAdapter(mLuaAdapter);
-        mLuaAdapter.setData(initData());
+
+        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getLua();
+            }
+        });
+//        mLuaAdapter.setData(initData());
 
 //        String f = FileUtil.getTestFolder() + "/lua.lua";
 //        FileUtil.createNewFile(f, "context = ...\n" +
@@ -91,8 +105,60 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getLua() {
-        getLua("http://192.168.137.1:5000/1");
-        getLua("http://192.168.137.1:5000/2");
+//        getLua("http://192.168.137.1:5000/1");
+//        getLua("http://192.168.137.1:5000/2");
+        getList("http://192.168.137.1:5000/list");
+    }
+
+    private void getList(String url) {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url(url).build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i(TAG, "onFailure: " + e);
+                mRefreshLayout.setRefreshing(false);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String content = response.body().string();
+
+                Log.i(TAG, "onResponse: " + content);
+
+                final List<TestBean> list = new ArrayList<>();
+
+                Gson gson = new Gson();
+                JsonArray array = gson.fromJson(content, JsonArray.class);
+                for (int i = 0; i < array.size(); i ++) {
+                    JsonObject json = array.get(i).getAsJsonObject();
+                    String type = json.get("type").getAsString();
+                    if (TextUtils.equals(type, TestBean.TYPE_LUA)) {
+                        LuaBean bean = gson.fromJson(json.get("data"), LuaBean.class);
+
+                        LuaCahce.put(bean.getId(), bean);
+
+                        list.add(new TestBean(TestBean.TYPE_LUA, bean));
+                    } else if (TextUtils.equals(type, TestBean.TYPE_TEST_1)) {
+                        Test1 test1 = gson.fromJson(json.get("data"), Test1.class);
+                        list.add(new TestBean(TestBean.TYPE_TEST_1, test1));
+                    }
+                }
+
+                Log.i(TAG, "onResponse: " + list);
+
+                mRecyclerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mLuaAdapter.setData(list);
+
+                        mRefreshLayout.setRefreshing(false);
+                    }
+                });
+
+                Log.i(TAG, "onResponse: " + content);
+            }
+        });
     }
 
     private void getLua(final String url) {
@@ -108,16 +174,12 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 final String content = response.body().string();
 
+                final LuaBean bean = new Gson().fromJson(content, LuaBean.class);
+
                 mRecyclerView.post(new Runnable() {
                     @Override
                     public void run() {
-                        LuaBean luaBean = new LuaBean();
-                        luaBean.setScript(content);
-                        if (url.endsWith("2")) {
-                            luaBean.setType(LuaBean.TYPE_CUSTOM);
-                        }
-
-                        mLuaAdapter.add(new TestBean(TestBean.TYPE_LUA, luaBean));
+                        mLuaAdapter.add(new TestBean(TestBean.TYPE_LUA, bean));
                     }
                 });
 

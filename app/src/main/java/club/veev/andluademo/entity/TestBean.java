@@ -27,6 +27,14 @@ public class TestBean {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return "TestBean{" +
+                "type='" + type + '\'' +
+                ", data=" + data +
+                '}';
+    }
+
     public String getType() {
         return type;
     }

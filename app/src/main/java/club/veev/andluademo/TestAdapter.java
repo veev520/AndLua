@@ -1,10 +1,9 @@
 package club.veev.andluademo;
 
-import android.app.AlertDialog;
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +26,10 @@ import club.veev.andluademo.entity.TestBean;
  */
 public class TestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final int TYPE_LUA = 1;
-    private static final int TYPE_TEST_1 = 2;
+    private static final String TAG = "TestAdapter";
+
+    private static final int TYPE_LUA = 10000;
+    private static final int TYPE_TEST_1 = 1;
 
     private List<TestBean> mList;
 
@@ -50,10 +51,21 @@ public class TestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         if (viewType == TYPE_TEST_1) {
             itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_test_1, parent, false);
+            Log.i(TAG, "onCreateViewHolder: test1");
             return new Test1ViewHolder(itemView);
-        } else if (viewType == TYPE_LUA) {
-            itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_lua, parent, false);
-            return new LuaViewHolder(itemView);
+        } else if (viewType >= TYPE_LUA) {
+            int id = viewType - TYPE_LUA;
+            LuaBean luaBean = LuaCahce.get(id);
+
+            ILuaView luaView;
+            if (TextUtils.equals(LuaBean.TYPE_CUSTOM, luaBean.getType())) {
+                luaView = LuaView.loadCustom(parent.getContext(), luaBean.getScript());
+            } else {
+                luaView = LuaView.load(parent.getContext(), luaBean.getScript());
+            }
+
+            Log.i(TAG, "onCreateViewHolder: lua");
+            return new LuaViewHolder(luaView.getView());
         }
 
         return null;
@@ -63,11 +75,13 @@ public class TestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
         if (getItemViewType(position) == TYPE_TEST_1) {
+            Log.i(TAG, "onBindViewHolder: test1");
             ((Test1ViewHolder) holder).setData(mList.get(position));
         }
 
         if (getItemViewType(position) == TYPE_LUA) {
-            ((LuaViewHolder) holder).setData(mList.get(position));
+            Log.i(TAG, "onBindViewHolder: lua");
+//            ((LuaViewHolder) holder).setData(mList.get(position));
         }
     }
 
@@ -86,7 +100,8 @@ public class TestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         switch (type) {
             case TestBean.TYPE_LUA:
-                return TYPE_LUA;
+                LuaBean bean = (LuaBean) mList.get(position).getData();
+                return TYPE_LUA + bean.getId();
             case TestBean.TYPE_TEST_1:
                 return TYPE_TEST_1;
             default:
@@ -108,6 +123,7 @@ public class TestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private void setData(TestBean bean) {
             try {
+                Log.i(TAG, "setData: " + bean);
                 Test1 test1 = (Test1) bean.getData();
 
                 mTextTitle.setText(test1.getTitle());
@@ -123,6 +139,14 @@ public class TestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public LuaViewHolder(View itemView) {
             super(itemView);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.i(TAG, "onClick: " + v.getWidth());
+                    Log.i(TAG, "onClick: " + v.getHeight());
+                }
+            });
         }
 
         private void setData(TestBean bean) {
