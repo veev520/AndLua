@@ -35,6 +35,7 @@ public class TestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void setData(List<TestBean> data) {
         mList = data;
+
         notifyDataSetChanged();
     }
 

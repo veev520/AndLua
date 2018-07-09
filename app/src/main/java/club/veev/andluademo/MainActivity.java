@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import club.veev.andlua.utils.FileUtil;
 import club.veev.andluademo.entity.LuaBean;
 import club.veev.andluademo.entity.Test1;
 import club.veev.andluademo.entity.TestBean;
@@ -151,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         mLuaAdapter.setData(list);
+                        mRecyclerView.getRecycledViewPool();
 
                         mRefreshLayout.setRefreshing(false);
                     }
